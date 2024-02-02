@@ -72,7 +72,7 @@ const UpdateSales = ({ open, setOpen, saleItem, refresh }: AddSalesParams) => {
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await fetch('http://localhost:3000/api/sales', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sales`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',

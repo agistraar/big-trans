@@ -19,10 +19,13 @@ const Home = async () => {
   });
   const parsed = await res.json();
   //daily data
-  const dailySale = Number(parsed.dailySaleTotal[0].nominal);
-  const dailyPayment = Number(parsed.dailyPaymentTotal._sum.nominal);
-  const dailyTotal =
-    (dailySale ? dailySale : 0) + (dailyPayment ? dailyPayment : 0);
+  const dailySale = parsed.dailySaleTotal
+    ? Number(parsed.dailySaleTotal[0].nominal)
+    : 0;
+  const dailyPayment = parsed.dailyPaymentTotal._sum
+    ? Number(parsed.dailyPaymentTotal._sum.nominal)
+    : 0;
+  const dailyTotal = dailySale + dailyPayment;
   const dailyInet = parsed.typeDailyPaymentTotal.find(
     (val: any) => val.type == 'INET'
   );

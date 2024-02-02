@@ -38,7 +38,7 @@ const AddSales = ({ open, setOpen, user, refresh }: AddSalesParams) => {
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await fetch('http://localhost:3000/api/sales', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sales`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

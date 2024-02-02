@@ -53,6 +53,8 @@ export async function GET(req: NextRequest) {
     const filterType = req.nextUrl.searchParams.get('filtertype') as string;
     const region = req.nextUrl.searchParams.get('region') as string;
 
+    const status = Number(req.nextUrl.searchParams.get('filter') as string);
+
     const getPaymentlist = await prisma.invoice.findMany({
       take: take,
       skip: skip,
@@ -92,6 +94,12 @@ export async function GET(req: NextRequest) {
         status: {
           equals: filter,
         },
+        ...(filter === false && status === 2
+          ? { payDueDate: { lte: new Date(Date.now()) } }
+          : {}),
+        ...(filter === false && status === 0
+          ? { payDueDate: { gt: new Date(Date.now()) } }
+          : {}),
         customer: {
           ...(region !== 'semua' ? { regionId: region } : {}),
           ...(filterType !== '0'
@@ -127,27 +135,16 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    if (Number(req.nextUrl.searchParams.get('filter') as string) === 0) {
-      const filteredData = getPaymentlist.filter((items) =>
-        moment().isSameOrBefore(moment(items.payDueDate).add({ days: 1 }))
-      );
-
-      return NextResponse.json(
-        { payments: filteredData, count: filteredData.length },
-        { status: 200 }
-      );
-    } else if (Number(req.nextUrl.searchParams.get('filter') as string) === 2) {
-      const filteredData = getPaymentlist.filter((items) =>
-        moment().isAfter(moment(items.payDueDate).add({ days: 1 }))
-      );
-
-      return NextResponse.json(
-        { payments: filteredData, count: filteredData.length },
-        { status: 200 }
-      );
-    }
-
-    const countData = await prisma.invoice.count();
+    const countData = await prisma.invoice.count({
+      where: {
+        ...(filter === false && status === 2
+          ? { payDueDate: { lte: new Date(Date.now()) } }
+          : {}),
+        ...(filter === false && status === 0
+          ? { payDueDate: { gt: new Date(Date.now()) } }
+          : {}),
+      },
+    });
 
     return NextResponse.json(
       { payments: getPaymentlist, count: countData },

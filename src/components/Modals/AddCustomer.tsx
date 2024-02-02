@@ -14,9 +14,10 @@ interface AddCustomerParams {
   open: boolean;
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   region: regionsType[];
+  refresh: () => Promise<void>;
 }
 
-const AddCustomer = ({ open, setOpen, region }: AddCustomerParams) => {
+const AddCustomer = ({ open, setOpen, region, refresh }: AddCustomerParams) => {
   const onSubmit: FormEventHandler<HTMLFormElement> = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -39,7 +40,7 @@ const AddCustomer = ({ open, setOpen, region }: AddCustomerParams) => {
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await fetch('http://localhost:3000/api/customer', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/customer`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -56,6 +57,7 @@ const AddCustomer = ({ open, setOpen, region }: AddCustomerParams) => {
         });
 
         if (res.ok) {
+          refresh();
           setOpen(false);
           Swal.fire('Pelanggan Berhasil Ditambahkan', '', 'success');
         } else {

@@ -18,6 +18,7 @@ interface UpdateCustomerParams {
   setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   data: paymentListParams;
   total: number;
+  refresh: () => Promise<void>;
 }
 
 const UpdateCustomer = ({
@@ -25,6 +26,7 @@ const UpdateCustomer = ({
   setOpen,
   data,
   total,
+  refresh,
 }: UpdateCustomerParams) => {
   const [deletedId, setDeletedId] = React.useState<number[]>([]);
 
@@ -59,7 +61,7 @@ const UpdateCustomer = ({
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
-        const res = await fetch('http://localhost:3000/api/payment', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment`, {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
@@ -83,6 +85,7 @@ const UpdateCustomer = ({
           }),
         });
         if (res.ok) {
+          refresh();
           setOpen(false);
           Swal.fire('Data Pelanggan Berhasil Diedit', '', 'success');
         } else {

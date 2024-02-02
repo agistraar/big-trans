@@ -2,7 +2,6 @@
 import { Add } from '@mui/icons-material';
 import {
   Button,
-  CircularProgress,
   Paper,
   Table,
   TableBody,
@@ -11,9 +10,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  Typography,
 } from '@mui/material';
-import DebouncedInput from '../Input/DebouncedInput';
 import AddSales from '../Modals/AddSales';
 import React from 'react';
 import { useSession } from 'next-auth/react';
@@ -41,9 +38,12 @@ export default function SalesTable() {
 
   const user = useSession().data?.user;
 
-  const query =
-    process.env.NEXT_PUBLIC_API_URL +
-    `/sales?take=${rowsPerPage}&skip=${page * rowsPerPage}`;
+  const query = React.useMemo(
+    () =>
+      process.env.NEXT_PUBLIC_API_URL +
+      `/sales?take=${rowsPerPage}&skip=${page * rowsPerPage}`,
+    [page, rowsPerPage]
+  );
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -77,17 +77,6 @@ export default function SalesTable() {
   return (
     <TableContainer component={Paper}>
       <div className='flex justify-between px-3 py-4 items-end'>
-        <div className=' space-x-4 flex items-end'>
-          {/* <div className='flex flex-col'>
-            <Typography variant='subtitle2'>Pencarian</Typography>
-            <DebouncedInput
-              value={''}
-              placeholder='Cari'
-              onChange={() => console.log('search')}
-              size='small'
-            />
-          </div> */}
-        </div>
         <Button
           startIcon={<Add />}
           variant='outlined'

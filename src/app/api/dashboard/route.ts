@@ -4,7 +4,9 @@ import moment from 'moment';
 import 'moment/locale/id';
 import { Prisma } from '@prisma/client';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
   try {
     const dailyPaymentTotal = await prisma.transaction.aggregate({
       _sum: {

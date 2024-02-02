@@ -11,12 +11,12 @@ import Paper from '@mui/material/Paper';
 import { paymentListParams } from '@/app/api/payment/route';
 import {
   Button,
-  CircularProgress,
   MenuItem,
   Select,
   TablePagination,
+  TextField,
 } from '@mui/material';
-import DebouncedInput from '../Input/DebouncedInput';
+import { useDebounce, useDebouncedCallback } from 'use-debounce';
 import { useSession } from 'next-auth/react';
 import { Add } from '@mui/icons-material';
 import AddCustomer from '../Modals/AddCustomer';
@@ -89,11 +89,14 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
     },
   ];
 
-  const query =
-    process.env.NEXT_PUBLIC_API_URL +
-    `/payment?take=${rowsPerPage}&skip=${
-      page * rowsPerPage
-    }&filter=${filter}&filtertype=${type}&region=${region}`;
+  const query = React.useMemo(
+    () =>
+      process.env.NEXT_PUBLIC_API_URL +
+      `/payment?take=${rowsPerPage}&skip=${
+        page * rowsPerPage
+      }&filter=${filter}&filtertype=${type}&region=${region}`,
+    [filter, page, region, rowsPerPage, type]
+  );
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -105,16 +108,39 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
     fetchData();
   }, [query]);
 
-  const handleSearch = async (value: string) => {
-    const encodedSearchQuery = encodeURI(value || '');
-    const res = await fetch(
-      encodedSearchQuery === ''
-        ? query
-        : query + `&search=${encodedSearchQuery}`
-    );
-    const resData = await res.json();
-    setData(resData.payments);
-    data && setCount(data!.length);
+  const debounced = useDebouncedCallback(
+    // function
+    (value) => {
+      handleSearch(value);
+    },
+    // delay in ms
+    1000
+  );
+
+  const handleSearch = async (val: string) => {
+    if (val === '') {
+      const res = await fetch(query);
+      const parsed = await res.json();
+      setData(parsed.payments);
+      setCount(parsed.count);
+    } else {
+      const encodedSearchQuery = encodeURI(val);
+      const res = await fetch(
+        encodedSearchQuery === ''
+          ? query
+          : query + `&search=${encodedSearchQuery}`
+      );
+      const resData = await res.json();
+      setData(resData.payments);
+      setCount(resData.payments.length);
+    }
+  };
+
+  const refresh = async () => {
+    const res = await fetch(query);
+    const parsed = await res.json();
+    setData(parsed.payments);
+    setCount(parsed.count);
   };
 
   const handleChangePage = (event: unknown, newPage: number) => {
@@ -133,11 +159,13 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
         <div className=' space-x-4 flex items-end'>
           <div className='flex flex-col'>
             <Typography variant='subtitle2'>Pencarian</Typography>
-            <DebouncedInput
-              value={''}
-              onChange={(value) => handleSearch(String(value))}
+            <TextField
+              defaultValue={''}
               placeholder='Cari'
               size='small'
+              onChange={(e) => {
+                debounced(e.target.value);
+              }}
             />
           </div>
           <div className='flex flex-col'>
@@ -228,6 +256,7 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
                 role={user?.role!}
                 setShowUpdate={setShowUpdateModal}
                 setModalData={setModalData}
+                refresh={refresh}
               />
             ))
           ) : (
@@ -253,6 +282,7 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
           open={showAddModal}
           setOpen={setShowAddModal}
           region={regions}
+          refresh={refresh}
         />
       )}
       {showUpdateModal && (
@@ -261,8 +291,13 @@ export default function CustomerTable({ regions }: { regions: regionsType[] }) {
           setOpen={setShowUpdateModal}
           data={modalData?.data!}
           total={modalData?.total!}
+          refresh={refresh}
         />
       )}
     </TableContainer>
   );
 }
+
+const SearchBar = () => {
+  return <TextField placeholder='Cari' size='small' />;
+};

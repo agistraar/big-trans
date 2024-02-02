@@ -32,7 +32,8 @@ const HandlePay = async (
   invoice: number,
   user: number,
   total: number,
-  payed: number
+  payed: number,
+  refresh: () => Promise<void>
 ) => {
   const isLunas = payed + nominal >= total ? 1 : 0;
 
@@ -47,7 +48,7 @@ const HandlePay = async (
     },
   }).then(async (result) => {
     if (result.isConfirmed) {
-      const res = await fetch('http://localhost:3000/api/payment', {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/payment`, {
         method: 'POST',
         cache: 'no-cache',
         headers: {
@@ -63,6 +64,7 @@ const HandlePay = async (
 
       if (res.ok) {
         Swal.fire('Pembayaran Berhasil', '', 'success');
+        refresh();
       } else {
         Swal.fire(
           'Server mengalami kendala, silahkan coba dalam beberapa saat lagi',
@@ -80,12 +82,14 @@ const CustomerPayRow = React.memo(function CustomerPayRow({
   role,
   setShowUpdate,
   setModalData,
+  refresh,
 }: {
   row: paymentListParams;
   userId: number;
   role: Role;
   setShowUpdate: React.Dispatch<React.SetStateAction<boolean>>;
   setModalData: (data: UpdateModalData) => void;
+  refresh: () => Promise<void>;
 }) {
   const [open, setOpen] = React.useState(false);
   const [nominalToPay, setNominalToPay] = React.useState<number>(0);
@@ -283,7 +287,8 @@ const CustomerPayRow = React.memo(function CustomerPayRow({
                             row.id,
                             userId,
                             nominal,
-                            payed
+                            payed,
+                            refresh
                           )
                         }
                         variant='contained'

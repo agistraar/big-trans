@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 import prisma from '../db';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: Request) {
   try {
     const regions = await prisma.region.findMany();
 
