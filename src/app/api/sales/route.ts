@@ -146,3 +146,28 @@ export async function PATCH(req: Request) {
     return NextResponse.json({ message: e }, { status: 500 });
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const body = await req.json();
+
+    const { id } = body;
+
+    await prisma.saleDetail.deleteMany({ where: { saleId: id } });
+    await prisma.sale.delete({ where: { id: id } });
+
+    return NextResponse.json(
+      {
+        message: 'Data Penjualan Berhasil Dihapus',
+      },
+      { status: 201 }
+    );
+  } catch (e) {
+    return NextResponse.json(
+      {
+        message: e,
+      },
+      { status: 500 }
+    );
+  }
+}

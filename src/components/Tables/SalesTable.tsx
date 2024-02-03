@@ -97,6 +97,7 @@ export default function SalesTable() {
             <TableCell className='max-w-16' align='right'>
               Total Penjualan
             </TableCell>
+            <TableCell />
           </TableRow>
         </TableHead>
         <TableBody>
@@ -108,6 +109,7 @@ export default function SalesTable() {
                 role={user?.role!}
                 setData={setUpdateModalData}
                 setModalOpen={setShowUpdateModal}
+                refresh={refresh}
               />
             ))
           ) : (

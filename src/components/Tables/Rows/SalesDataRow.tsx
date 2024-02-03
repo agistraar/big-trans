@@ -1,5 +1,9 @@
 import { tableSalesData } from '@/app/api/sales/route';
-import { EditOutlined, KeyboardArrowDownOutlined } from '@mui/icons-material';
+import {
+  DeleteOutline,
+  EditOutlined,
+  KeyboardArrowDownOutlined,
+} from '@mui/icons-material';
 import {
   Box,
   Button,
@@ -17,6 +21,7 @@ import { Role } from '@prisma/client';
 import moment from 'moment';
 import 'moment/locale/id';
 import React from 'react';
+import Swal from 'sweetalert2';
 
 interface salesDataRowParams {
   row: tableSalesData;
@@ -34,6 +39,7 @@ interface salesDataRowParams {
     >
   >;
   setModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refresh: () => Promise<void>;
 }
 
 const SalesDataRow = React.memo(function SalesDataRow({
@@ -41,6 +47,7 @@ const SalesDataRow = React.memo(function SalesDataRow({
   setData,
   role,
   setModalOpen,
+  refresh,
 }: salesDataRowParams) {
   const [open, setOpen] = React.useState(false);
 
@@ -49,6 +56,42 @@ const SalesDataRow = React.memo(function SalesDataRow({
     (total, item) => total + item.nominal * item.quantity,
     0
   );
+
+  const onDelete = (id: number) => {
+    Swal.fire({
+      title: 'Yakin ingin menghapus penjualan ini?',
+      showDenyButton: true,
+      confirmButtonText: 'Hapus',
+      icon: 'warning',
+      denyButtonText: `Batal`,
+      customClass: {
+        container: 'swal-overlay',
+      },
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/sales`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            id: id,
+          }),
+        });
+
+        if (res.ok) {
+          refresh();
+          Swal.fire('Penjualan Berhasil Dihapus', '', 'success');
+        } else {
+          Swal.fire(
+            'Server mengalami kendala, silahkan coba dalam beberapa saat lagi',
+            '',
+            'error'
+          );
+        }
+      }
+    });
+  };
 
   return (
     <React.Fragment>
@@ -72,6 +115,11 @@ const SalesDataRow = React.memo(function SalesDataRow({
             currency: 'IDR',
             maximumFractionDigits: 0,
           }).format(amount)}
+        </TableCell>
+        <TableCell align='right'>
+          <IconButton onClick={() => onDelete(row.id)}>
+            <DeleteOutline />
+          </IconButton>
         </TableCell>
       </TableRow>
       <TableRow className={`${open && 'bg-gray-50'}`}>
