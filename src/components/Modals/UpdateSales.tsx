@@ -23,6 +23,39 @@ interface AddSalesParams {
   }[];
 }
 
+interface SaleDetailData {
+  i: number;
+  item: {
+    id: number;
+    saleId: number;
+    name: string;
+    quantity: number;
+    nominal: number;
+    deleted: Date | null;
+  };
+  handleDelete: (id: number) => void;
+  itemList: {
+    id: number;
+    saleId: number;
+    name: string;
+    quantity: number;
+    nominal: number;
+    deleted: Date | null;
+  }[];
+  setItemList: React.Dispatch<
+    React.SetStateAction<
+      {
+        id: number;
+        saleId: number;
+        name: string;
+        quantity: number;
+        nominal: number;
+        deleted: Date | null;
+      }[]
+    >
+  >;
+}
+
 const UpdateSales = ({ open, setOpen, saleItem, refresh }: AddSalesParams) => {
   const [itemList, setItemList] = React.useState<
     {
@@ -41,13 +74,6 @@ const UpdateSales = ({ open, setOpen, saleItem, refresh }: AddSalesParams) => {
     () =>
       itemList.reduce((total, item) => total + item.nominal * item.quantity, 0),
     [itemList]
-  );
-
-  const getBooleanDeleted = React.useCallback(
-    (id: number) => {
-      return deletedId.includes(id);
-    },
-    [deletedId]
   );
 
   const handleDelete = (id: number) => {
@@ -108,64 +134,14 @@ const UpdateSales = ({ open, setOpen, saleItem, refresh }: AddSalesParams) => {
         <Typography variant='h5'>Update Data Penjualan</Typography>
         <div className='py-4 flex flex-col w-full space-y-2 justify-start h-full overflow-y-auto mb-4'>
           {itemList.map((item, i) => (
-            <div key={i} className='flex space-x-2 w-full items-center '>
-              <Typography variant='subtitle1' className='text-gray-500'>
-                {Number(i + 1) + '.'}
-              </Typography>
-              <TextField
-                label={'Barang ' + Number(i + 1)}
-                value={item.name}
-                className='w-2/5'
-                size='small'
-                error={getBooleanDeleted(item.id)}
-                onChange={(e) =>
-                  setItemList(
-                    itemList.map((data, index) =>
-                      index === i
-                        ? { ...data, name: String(e.target.value) }
-                        : data
-                    )
-                  )
-                }
-              />
-              <TextField
-                label={'Harga ' + Number(i + 1)}
-                value={item.nominal}
-                className='w-2/5'
-                size='small'
-                error={getBooleanDeleted(item.id)}
-                onChange={(e) =>
-                  !isNaN(Number(e.target.value)) &&
-                  setItemList(
-                    itemList.map((data, index) =>
-                      index === i
-                        ? { ...data, nominal: Number(e.target.value) }
-                        : data
-                    )
-                  )
-                }
-              />
-              <TextField
-                label={'Jumlah ' + Number(i + 1)}
-                value={item.quantity}
-                className='w-1/5'
-                size='small'
-                error={getBooleanDeleted(item.id)}
-                onChange={(e) =>
-                  !isNaN(Number(e.target.value)) &&
-                  setItemList(
-                    itemList.map((data, index) =>
-                      index === i
-                        ? { ...data, quantity: Number(e.target.value) }
-                        : data
-                    )
-                  )
-                }
-              />
-              <IconButton onClick={() => handleDelete(item.id)}>
-                <DeleteOutline />
-              </IconButton>
-            </div>
+            <SaleDetailData
+              key={i}
+              i={i}
+              handleDelete={handleDelete}
+              item={item}
+              itemList={itemList}
+              setItemList={setItemList}
+            />
           ))}
         </div>
         <div className='w-full flex justify-between items-center'>
@@ -192,6 +168,76 @@ const UpdateSales = ({ open, setOpen, saleItem, refresh }: AddSalesParams) => {
         </div>
       </form>
     </Modal>
+  );
+};
+
+const SaleDetailData = ({
+  handleDelete,
+  i,
+  item,
+  setItemList,
+  itemList,
+}: SaleDetailData) => {
+  const [isDeleted, setIsDeleted] = React.useState(false);
+
+  return (
+    <div className='flex space-x-2 w-full items-center '>
+      <Typography variant='subtitle1' className='text-gray-500'>
+        {Number(i + 1) + '.'}
+      </Typography>
+      <TextField
+        label={'Barang ' + Number(i + 1)}
+        value={item.name}
+        className='w-2/5'
+        size='small'
+        error={isDeleted}
+        onChange={(e) =>
+          setItemList(
+            itemList.map((data, index) =>
+              index === i ? { ...data, name: String(e.target.value) } : data
+            )
+          )
+        }
+      />
+      <TextField
+        label={'Harga ' + Number(i + 1)}
+        value={item.nominal}
+        className='w-2/5'
+        size='small'
+        error={isDeleted}
+        onChange={(e) =>
+          !isNaN(Number(e.target.value)) &&
+          setItemList(
+            itemList.map((data, index) =>
+              index === i ? { ...data, nominal: Number(e.target.value) } : data
+            )
+          )
+        }
+      />
+      <TextField
+        label={'Jumlah ' + Number(i + 1)}
+        value={item.quantity}
+        className='w-1/5'
+        size='small'
+        error={isDeleted}
+        onChange={(e) =>
+          !isNaN(Number(e.target.value)) &&
+          setItemList(
+            itemList.map((data, index) =>
+              index === i ? { ...data, quantity: Number(e.target.value) } : data
+            )
+          )
+        }
+      />
+      <IconButton
+        onClick={() => {
+          handleDelete(item.id);
+          setIsDeleted((prev) => !prev);
+        }}
+      >
+        <DeleteOutline />
+      </IconButton>
+    </div>
   );
 };
 

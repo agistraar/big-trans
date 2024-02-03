@@ -37,10 +37,17 @@ export async function GET() {
             name: true,
           },
         },
-        saleDetail: true,
+        saleDetail: {
+          where: {
+            deleted: null,
+          },
+        },
       },
       orderBy: {
         createdAt: 'desc',
+      },
+      where: {
+        deleted: null,
       },
     });
 

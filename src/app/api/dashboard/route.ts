@@ -14,6 +14,7 @@ export async function GET(req: Request) {
       },
       where: {
         createdAt: { gte: new Date(moment().format('YYYY-MM-DD')) },
+        deleted: null,
       },
     });
 
@@ -22,7 +23,7 @@ export async function GET(req: Request) {
         `SELECT SUM(nominal) as nominal from saleDetail, sale 
         where saleDetail.saleId = sale.id AND DATE(sale.createdAt) = '${moment().format(
           'YYYY-MM-DD'
-        )}'`
+        )}' AND saleDetail.deleted IS NULL AND sale.deleted IS NULL`
       )
     );
 
@@ -32,7 +33,7 @@ export async function GET(req: Request) {
         where customer.id = invoice.customerId AND invoice.id = transaction.invoiceId 
         AND DATE(transaction.createdAt) = '${moment().format(
           'YYYY-MM-DD'
-        )}' GROUP BY customer.type`
+        )}' AND transaction.deleted IS NULL GROUP BY customer.type`
       )
     );
 
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
           gte: new Date(moment().startOf('month').format('YYYY-MM-DD')),
           lte: new Date(moment().endOf('month').format('YYYY-MM-DD')),
         },
+        deleted: null,
       },
     });
 
@@ -55,7 +57,9 @@ export async function GET(req: Request) {
           .startOf('month')
           .format('YYYY-MM-DD')}' AND DATE(sale.createdAt) <= '${moment()
           .endOf('month')
-          .format('YYYY-MM-DD')}'`
+          .format(
+            'YYYY-MM-DD'
+          )}' AND saleDetail.deleted IS NULL AND sale.deleted IS NULL`
       )
     );
 
@@ -67,8 +71,9 @@ export async function GET(req: Request) {
           .startOf('month')
           .format('YYYY-MM-DD')}' AND DATE(transaction.createdAt) <= '${moment()
           .endOf('month')
-          .format('YYYY-MM-DD')}' 
-          GROUP BY customer.type`
+          .format(
+            'YYYY-MM-DD'
+          )}' AND transaction.deleted IS NULL GROUP BY customer.type`
       )
     );
 

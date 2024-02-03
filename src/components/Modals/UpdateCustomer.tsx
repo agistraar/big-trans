@@ -21,6 +21,20 @@ interface UpdateCustomerParams {
   refresh: () => Promise<void>;
 }
 
+interface TransactionRowParams {
+  index: number;
+  val: {
+    id: number;
+    createdAt: Date;
+    nominal: number;
+    user: {
+      id: number;
+      name: string;
+    };
+  };
+  handleDelete: (id: number) => void;
+}
+
 const UpdateCustomer = ({
   open,
   setOpen,
@@ -193,23 +207,12 @@ const UpdateCustomer = ({
               <Typography>Data Transaksi</Typography>
               <div className='w-full flex flex-col space-y-3 overflow-y-auto py-3'>
                 {data.transaksi.map((val, index) => (
-                  <div
-                    className='flex w-full space-x-2 items-center'
+                  <TransactionRow
                     key={index}
-                  >
-                    <TextField
-                      label={'Pembayaran ' + (index + 1)}
-                      id={'transaksi' + val.id}
-                      name={'transaksi' + val.id}
-                      type='number'
-                      className='w-full'
-                      defaultValue={val.nominal}
-                      error={deletedId.includes(val.id)}
-                    />
-                    <IconButton onClick={() => handleDelete(val.id)}>
-                      <DeleteOutlined />
-                    </IconButton>
-                  </div>
+                    index={index}
+                    val={val}
+                    handleDelete={handleDelete}
+                  />
                 ))}
               </div>
             </div>
@@ -229,6 +232,31 @@ const UpdateCustomer = ({
         </div>
       </form>
     </Modal>
+  );
+};
+
+const TransactionRow = ({ index, val, handleDelete }: TransactionRowParams) => {
+  const [isDeleted, setIsDeleted] = React.useState(false);
+  return (
+    <div className='flex w-full space-x-2 items-center'>
+      <TextField
+        label={'Pembayaran ' + (index + 1)}
+        id={'transaksi' + val.id}
+        name={'transaksi' + val.id}
+        type='number'
+        className='w-full'
+        defaultValue={val.nominal}
+        error={isDeleted}
+      />
+      <IconButton
+        onClick={() => {
+          handleDelete(val.id);
+          setIsDeleted((prev) => !prev);
+        }}
+      >
+        <DeleteOutlined />
+      </IconButton>
+    </div>
   );
 };
 

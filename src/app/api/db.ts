@@ -26,6 +26,28 @@ const prismaClientSingleton = () => {
             },
           });
         },
+        async deleteMany({ where }: { where: { saleId: number } }) {
+          return client.saleDetail.updateMany({
+            where: {
+              ...where,
+            },
+            data: {
+              deleted: new Date(),
+            },
+          });
+        },
+      },
+      sale: {
+        async delete({ where }: { where: { id: number } }) {
+          return client.sale.update({
+            where: {
+              ...where,
+            },
+            data: {
+              deleted: new Date(),
+            },
+          });
+        },
       },
     },
   });
