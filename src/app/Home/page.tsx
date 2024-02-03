@@ -26,30 +26,33 @@ const Home = async () => {
     ? Number(parsed.dailyPaymentTotal._sum.nominal)
     : 0;
   const dailyTotal = dailySale + dailyPayment;
-  const dailyInet = parsed.typeDailyPaymentTotal.find(
-    (val: any) => val.type == 'INET'
-  );
-  const dailyDigital = parsed.typeDailyPaymentTotal.find(
-    (val: any) => val.type == 'DIGITAL'
-  );
-  const dailyAnalog = parsed.typeDailyPaymentTotal.find(
-    (val: any) => val.type == 'ANALOG'
-  );
+  const dailyInet = parsed.typeDailyPaymentTotal
+    ? parsed.typeDailyPaymentTotal.find((val: any) => val.type == 'INET')
+    : undefined;
+  const dailyDigital = parsed.typeDailyPaymentTotal
+    ? parsed.typeDailyPaymentTotal.find((val: any) => val.type == 'DIGITAL')
+    : undefined;
+  const dailyAnalog = parsed.typeDailyPaymentTotal
+    ? parsed.typeDailyPaymentTotal.find((val: any) => val.type == 'ANALOG')
+    : undefined;
 
   //monthly data
-  const monthlySale = Number(parsed.monthlySaleTotal[0].nominal);
-  const monthlyPayment = Number(parsed.monthlyPaymentTotal._sum.nominal);
-  const monthlyTotal =
-    (monthlySale ? monthlySale : 0) + (monthlyPayment ? monthlyPayment : 0);
-  const monthlyInet = parsed.typeMonthlyPaymentTotal.find(
-    (val: any) => val.type == 'INET'
-  );
-  const monthlyDigital = parsed.typeMonthlyPaymentTotal.find(
-    (val: any) => val.type == 'DIGITAL'
-  );
-  const monthlyAnalog = parsed.typeMonthlyPaymentTotal.find(
-    (val: any) => val.type == 'ANALOG'
-  );
+  const monthlySale = parsed.monthlySaleTotal
+    ? Number(parsed.monthlySaleTotal[0].nominal)
+    : 0;
+  const monthlyPayment = parsed.monthlyPaymentTotal._sum
+    ? Number(parsed.monthlyPaymentTotal._sum.nominal)
+    : 0;
+  const monthlyTotal = monthlySale + monthlyPayment;
+  const monthlyInet = parsed.typeMonthlyPaymentTotal
+    ? parsed.typeMonthlyPaymentTotal.find((val: any) => val.type == 'INET')
+    : undefined;
+  const monthlyDigital = parsed.typeMonthlyPaymentTotal
+    ? parsed.typeMonthlyPaymentTotal.find((val: any) => val.type == 'DIGITAL')
+    : undefined;
+  const monthlyAnalog = parsed.typeMonthlyPaymentTotal
+    ? parsed.typeMonthlyPaymentTotal.find((val: any) => val.type == 'ANALOG')
+    : undefined;
 
   return (
     <div className='w-full min-h-screen'>
@@ -124,7 +127,7 @@ const Home = async () => {
                     style: 'currency',
                     currency: 'IDR',
                     maximumFractionDigits: 0,
-                  }).format(Number(monthlySale ? monthlySale : 0))}
+                  }).format(Number(monthlySale))}
                 </p>
               </div>
             </div>
@@ -169,7 +172,7 @@ const Home = async () => {
                     style: 'currency',
                     currency: 'IDR',
                     maximumFractionDigits: 0,
-                  }).format(dailySale ? dailySale : 0)}
+                  }).format(dailySale)}
                 </p>
               </div>
             </div>
