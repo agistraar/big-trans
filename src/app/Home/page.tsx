@@ -22,7 +22,7 @@ const Home = async () => {
   const dailySale = parsed.dailySaleTotal
     ? Number(parsed.dailySaleTotal[0].nominal)
     : 0;
-  const dailyPayment = parsed.dailyPaymentTotal._sum
+  const dailyPayment = parsed.dailyPaymentTotal._sum.nominal
     ? Number(parsed.dailyPaymentTotal._sum.nominal)
     : 0;
   const dailyTotal = dailySale + dailyPayment;
@@ -40,7 +40,7 @@ const Home = async () => {
   const monthlySale = parsed.monthlySaleTotal
     ? Number(parsed.monthlySaleTotal[0].nominal)
     : 0;
-  const monthlyPayment = parsed.monthlyPaymentTotal._sum
+  const monthlyPayment = parsed.monthlyPaymentTotal._sum.nominal
     ? Number(parsed.monthlyPaymentTotal._sum.nominal)
     : 0;
   const monthlyTotal = monthlySale + monthlyPayment;
